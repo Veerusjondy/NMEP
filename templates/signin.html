@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Dynamic Survey</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .auth-container {
+      background: white;
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .auth-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .auth-header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .auth-header p {
+      opacity: 0.9;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .auth-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: #f8f9fa;
+    }
+
+    .auth-form {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      animation: slideUp 0.6s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-input.error {
+      border-color: #e74c3c;
+      background: #fdf2f2;
+    }
+
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .phone-input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .country-code {
+      background: #e9ecef;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 15px;
+      font-weight: 600;
+      color: #495057;
+      min-width: 80px;
+      text-align: center;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+    }
+
+    .phone-number {
+      flex: 1;
+    }
+
+    .password-group {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 5px;
+    }
+
+    .password-toggle:hover {
+      color: #667eea;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      min-height: 50px;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .loading {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .loading.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .forgot-password {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .forgot-password a {
+      color: #667eea;
+      text-decoration: none;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+    }
+
+    .forgot-password a:hover {
+      text-decoration: underline;
+    }
+
+    .auth-footer {
+      text-align: center;
+      padding: 30px 20px;
+      background: #f8f9fa;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .auth-footer p {
+      color: #666;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+      margin-bottom: 15px;
+    }
+
+    .auth-footer a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 20px;
+      border: 2px solid #667eea;
+      border-radius: 25px;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .auth-footer a:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .auth-header {
+        padding: 40px 15px;
+      }
+
+      .auth-content {
+        padding: 20px 15px;
+      }
+
+      .auth-form {
+        padding: 30px 20px;
+      }
+
+      .auth-footer {
+        padding: 20px 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .phone-input-group {
+        flex-direction: column;
+      }
+
+      .country-code {
+        min-width: auto;
+      }
+
+      .auth-form {
+        padding: 25px 15px;
+      }
+    }
+
+    @media (max-width: 320px) {
+      .auth-header {
+        padding: 30px 10px;
+      }
+
+      .auth-content {
+        padding: 15px 10px;
+      }
+    }
+
+    /* Focus styles for accessibility */
+    .submit-btn:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+
+    .form-input:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+
+    /* High DPI displays */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .form-input {
+        border-width: 1px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-header">
+      <h1>Welcome Back</h1>
+      <p>
+        Sign in to continue to your survey and track your progress
+      </p>
+    </div>
+
+    <div class="auth-content">
+      <form class="auth-form" id="signinForm">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <div class="phone-input-group">
+            <div class="country-code">
+              +234
+            </div>
+            <input
+            type="tel"
+            id="phone"
+            name="phone"
+            class="form-input phone-number"
+            placeholder="Enter Phone Number"
+            maxlength="10"
+            required
+            >
+          </div>
+          <div class="error-message" id="phoneError">
+            Please enter a valid phone number
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-group">
+            <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="Enter your password"
+            required
+            >
+            <button type="button" class="password-toggle" onclick="togglePassword()">
+              👁️
+            </button>
+          </div>
+          <div class="error-message" id="passwordError">
+            Password is required
+          </div>
+        </div>
+
+        <div class="forgot-password">
+          <a href="#" onclick="forgotPassword()">Forgot your password?</a>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span class="btn-text">Sign In</span>
+          <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Signing in...</span>
+          </div>
+        </button>
+      </form>
+    </div>
+
+    <div class="auth-footer">
+      <p>
+        Don't have an account?
+      </p>
+      <a href="signup.html">Create Account</a>
+    </div>
+  </div>
+  <script>
+    let isSubmitting = false;
+
+    document.getElementById('signinForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!isSubmitting) handleSignIn();
+    });
+
+    document.getElementById('phone').addEventListener('input', function (e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 10) value = value.slice(0, 10);
+      e.target.value = value;
+      clearError('phone');
+    });
+
+    document.getElementById('password').addEventListener('input', function () {
+      clearError('password');
+    });
+
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const btn = document.querySelector('.password-toggle');
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+
+    function showError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      const errorElement = document.getElementById(fieldId + 'Error');
+      field.classList.add('error');
+      errorElement.textContent = message;
+      errorElement.classList.add('show');
+    }
+
+    function clearError(fieldId) {
+      const field = document.getElementById(fieldId);
+      const errorElement = document.getElementById(fieldId + 'Error');
+      field.classList.remove('error');
+      errorElement.classList.remove('show');
+    }
+
+    function validateForm() {
+      let valid = true;
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      clearError('phone');
+      clearError('password');
+
+      if (!phone) {
+        showError('phone', 'Phone number is required');
+        valid = false;
+      } else if (phone.length !== 10 || !/^[0-9]{10}$/.test(phone)) {
+        showError('phone', 'Enter a valid 10-digit number');
+        valid = false;
+      } else if (!/^[7-9][0-1][0-9]{8}$/.test(phone)) {
+        showError('phone', 'Invalid Nigerian format');
+        valid = false;
+      }
+
+      if (!password) {
+        showError('password', 'Password is required');
+        valid = false;
+      } else if (password.length < 6) {
+        showError('password', 'At least 6 characters');
+        valid = false;
+      }
+
+      return valid;
+    }
+
+    function setLoading(state) {
+      isSubmitting = state;
+      const btn = document.getElementById('submitBtn');
+      const text = document.querySelector('.btn-text');
+      const spinner = document.getElementById('loading');
+
+      btn.disabled = state;
+      text.style.display = state ? 'none': 'inline';
+      spinner.classList.toggle('show', state);
+    }
+
+    async function handleSignIn() {
+      if (!validateForm()) return;
+      setLoading(true);
+
+      const formData = {
+        phone: '+234' + document.getElementById('phone').value.trim(),
+        password: document.getElementById('password').value.trim()
+      };
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/api/signin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(formData)
+        });
+
+        const result = await res.json();
+        if (result.success) {
+          window.location.href = 'index.html';
+        } else {
+          alert(result.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Sign in failed. Try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    window.addEventListener('load', async function () {
+      try {
+        const res = await fetch('/api/session', {
+          credentials: 'include'
+        });
+        const session = await res.json();
+        if (session.signed_in) {
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        console.error('Session check failed:', err);
+      }
+    });
+
+
+    document.addEventListener('DOMContentLoaded', () => document.getElementById('phone').focus());
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !isSubmitting) handleSignIn();
+    });
+  </script>
+
+</body>
+</html>
