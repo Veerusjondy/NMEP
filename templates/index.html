@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malaria Survey - Nigeria</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .survey-container {
+      background: white;
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .user-header {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-info {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: #c0392b;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e0e0e0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .survey-header {
+      padding: 40px 20px 30px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      background: #f8f9fa;
+    }
+
+    .survey-header h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+    }
+
+    .survey-header p {
+      color: #666;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .page {
+      display: none;
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .question {
+      margin-bottom: 25px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 15px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .question h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: clamp(1.1rem, 2.5vw, 1.2rem);
+      line-height: 1.4;
+    }
+
+    .question-number {
+      color: #667eea;
+      font-weight: bold;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      margin-bottom: 5px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 50px;
+    }
+
+    .option:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+      transform: translateY(-1px);
+    }
+
+    .option input[type="radio"] {
+      margin-right: 12px;
+      transform: scale(1.2);
+      accent-color: #667eea;
+      flex-shrink: 0;
+    }
+
+    .option span {
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+      line-height: 1.4;
+    }
+
+    .option.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+      transition: border-color 0.3s ease;
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-top: 1px solid #eee;
+      background: #f8f9fa;
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 25px;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-height: 44px;
+      min-width: 100px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #666;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #d0d0d0;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .page-indicator {
+      color: #666;
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      font-weight: 500;
+    }
+
+    .welcome-page {
+      text-align: center;
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: auto;
+    }
+
+    .completion-page {
+      text-align: center;
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 60vh;
+    }
+
+    .completion-page h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+    }
+
+    .completion-page .checkmark {
+      font-size: clamp(3rem, 8vw, 4rem);
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
+
+    .completion-page p {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      line-height: 1.6;
+    }
+
+    .results-summary {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      text-align: left;
+      border: 1px solid #e0e0e0;
+    }
+
+    .results-summary h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: clamp(1.1rem, 2.5vw, 1.2rem);
+    }
+
+    .results-summary p {
+      margin-bottom: 10px;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+    }
+
+    /* Mobile-specific adjustments */
+    @media (max-width: 768px) {
+      .page {
+        padding: 15px;
+      }
+
+      .question {
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .navigation {
+        padding: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        min-width: 80px;
+      }
+
+      .welcome-page, .completion-page {
+        padding: 40px 15px;
+      }
+
+      .options {
+        gap: 10px;
+      }
+
+      .option {
+        padding: 12px;
+      }
+
+      .user-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 480px) {
+      .navigation {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+      }
+
+      .btn {
+        width: 100%;
+        max-width: 200px;
+      }
+
+      .page-indicator {
+        order: -1;
+      }
+
+      .question {
+        padding: 12px;
+      }
+
+      .text-input {
+        min-height: 100px;
+      }
+    }
+
+    /* Large screens */
+    @media (min-width: 1200px) {
+      .page {
+        padding: 40px;
+      }
+
+      .question {
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+
+      .navigation {
+        padding: 30px 40px;
+      }
+    }
+
+    /* Landscape mobile */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .welcome-page, .completion-page {
+        min-height: 50vh;
+        padding: 30px 15px;
+      }
+
+      .page {
+        padding: 15px;
+      }
+    }
+
+    /* High DPI displays */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .option {
+        border-width: 1px;
+      }
+
+      .text-input {
+        border-width: 1px;
+      }
+    }
+
+    /* Focus styles for accessibility */
+    .btn:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+
+    .option:focus-within {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .text-input:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Print styles */
+    @media print {
+      .navigation {
+        display: none;
+      }
+
+      .progress-bar {
+        display: none;
+      }
+
+      .user-header {
+        display: none;
+      }
+
+      .page {
+        display: block !important;
+        page-break-after: always;
+      }
+    }
+
+    /* New styles for the first screen */
+    .welcome-page {
+      padding-top: 40px;
+      padding-bottom: 40px;
+      justify-content: flex-start;
+      min-height: auto;
+    }
+
+    .logo-container {
+      margin-bottom: 30px;
+    }
+
+    .sproxil-logo {
+      max-width: 150px;
+      height: auto;
+    }
+
+    .welcome-page h1 {
+      font-size: clamp(1.8rem, 5vw, 2.2rem);
+      color: #333;
+      margin-bottom: 15px;
+      line-height: 1.2;
+    }
+
+    .description-text {
+      font-size: clamp(1rem, 2.8vw, 1.1rem);
+      color: #555;
+      margin-bottom: 30px;
+      line-height: 1.6;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .feature-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 30px auto;
+    }
+
+    .feature-card {
+      background: #fdfdfd;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .feature-icon {
+      background: #f0f0f0;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .feature-icon img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .feature-text {
+      font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+      color: #333;
+      font-weight: 500;
+      line-height: 1.4;
+      text-align: left;
+      flex-grow: 1;
+    }
+
+    .terms-text {
+      font-size: clamp(0.85rem, 2.2vw, 0.95rem);
+      color: #777;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .terms-link {
+      color: #E53935;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .terms-link:hover {
+      text-decoration: underline;
+    }
+
+    .start-survey-btn {
+      background: #E53935;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 20px rgba(229, 57, 53, 0.3);
+    }
+
+    .start-survey-btn:hover:not(:disabled) {
+      background: #C62828;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(229, 57, 53, 0.4);
+    }
+
+    .start-survey-btn .arrow {
+      font-size: 1.2em;
+      line-height: 1;
+    }
+
+    .footer-text {
+      font-size: clamp(0.9rem, 2.3vw, 1rem);
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .partner-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .partner-logo {
+      max-width: 120px;
+      height: auto;
+      opacity: 0.8;
+    }
+
+    /* Responsive adjustments for new elements */
+    @media (max-width: 768px) {
+      .welcome-page {
+        padding-top: 30px;
+        padding-bottom: 30px;
+      }
+      .logo-container {
+        margin-bottom: 20px;
+      }
+      .welcome-page h1 {
+        font-size: clamp(1.6rem, 4.5vw, 2rem);
+      }
+      .description-text {
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+        margin-bottom: 25px;
+      }
+      .feature-cards {
+        max-width: 350px;
+        margin-bottom: 25px;
+      }
+      .feature-card {
+        padding: 15px;
+        gap: 12px;
+      }
+      .feature-icon {
+        width: 40px;
+        height: 40px;
+      }
+      .feature-icon img {
+        width: 20px;
+        height: 20px;
+      }
+      .feature-text {
+        font-size: clamp(0.9rem, 2.3vw, 1rem);
+      }
+      .terms-text {
+        font-size: clamp(0.8rem, 2vw, 0.9rem);
+        margin-bottom: 20px;
+      }
+      .start-survey-btn {
+        padding: 12px 25px;
+        font-size: clamp(0.9rem, 2.2vw, 1rem);
+        margin-bottom: 20px;
+      }
+      .footer-text {
+        font-size: clamp(0.85rem, 2.2vw, 0.95rem);
+        margin-bottom: 25px;
+      }
+      .partner-logos {
+        gap: 20px;
+      }
+      .partner-logo {
+        max-width: 100px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .welcome-page {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      .feature-cards {
+        max-width: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      .start-survey-btn {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="survey-container">
+    <!-- User Header -->
+    <div class="user-header" id="userHeader" style="display: none;">
+      <div class="user-info" id="userInfo">
+        Welcome back!
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Welcome Page -->
+    <div class="page active" id="welcome">
+      <div class="welcome-page">
+        <div class="logo-container">
+          <img src="/placeholder.svg?height=50&width=150" alt="Sproxil Logo" class="sproxil-logo">
+        </div>
+        <h1>Help Shape Nigeria's Fight Against Malaria</h1>
+        <p class="description-text">
+          Share your experience with malaria to strengthen prevention and treatment in your community. Your insights will directly impact healthcare initiatives across Nigeria.
+        </p>
+
+        <div class="feature-cards">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <img src="/placeholder.svg?height=24&width=24" alt="Microphone icon">
+            </div>
+            <span class="feature-text">Quick 20-question survey</span>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <img src="/placeholder.svg?height=24&width=24" alt="Shield icon">
+            </div>
+            <span class="feature-text">100% confidential responses</span>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <img src="/placeholder.svg?height=24&width=24" alt="Money bag icon">
+            </div>
+            <span class="feature-text">Get back ₦3,000 Naira in airtime instantly</span>
+          </div>
+        </div>
+
+        <p class="terms-text">
+          Starting survey indicates that you agree <br> to the <a href="#" class="terms-link">Terms & Conditions</a>
+        </p>
+
+        <button class="btn start-survey-btn" onclick="startSurvey()"> Start Survey & Get back ₦3,000 <span class="arrow">→</span>
+        </button>
+
+        <p class="footer-text">
+          Together, we can defeat malaria in Nigeria
+        </p>
+
+        <div class="partner-logos">
+          <img src="/placeholder.svg?height=50&width=150" alt="National Malaria Elimination Programme Logo" class="partner-logo">
+          <img src="/placeholder.svg?height=50&width=150" alt="GF Logo" class="partner-logo">
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Pages -->
+    <div class="page" id="page1">
+      <div class="question">
+        <div class="question-number">
+          Question 1 of 20
+        </div>
+        <h3>Have you or anyone in your household been diagnosed with malaria in the past 12 months?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q1" value="yes">
+            <span>Yes</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q1" value="no">
+            <span>No</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 2 of 20
+        </div>
+        <h3>If yes to Q1, how many times have you personally been diagnosed with malaria in the past 12 months?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q2" value="0">
+            <span>0</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q2" value="1">
+            <span>1</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q2" value="2">
+            <span>2</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q2" value="3">
+            <span>3</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q2" value="4+">
+            <span>4 or more</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 3 of 20
+        </div>
+        <h3>Where did you seek diagnosis for your last malaria episode?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q3" value="hospital-clinic">
+            <span>Hospital/Clinic</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q3" value="pharmacy">
+            <span>Pharmacy</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q3" value="community-health-worker">
+            <span>Community Health Worker</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q3" value="traditional-healer">
+            <span>Traditional Healer</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q3" value="self-diagnosed">
+            <span>Self-diagnosed</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q3" value="did-not-seek">
+            <span>Did not seek diagnosis</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 4 of 20
+        </div>
+        <h3>Was your last malaria diagnosis confirmed by a blood test (e.g., RDT or microscopy)?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q4" value="yes">
+            <span>Yes</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q4" value="no">
+            <span>No</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q4" value="dont-know">
+            <span>Don't know</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 5 of 20
+        </div>
+        <h3>How long did it take from when you first felt symptoms to when you received a diagnosis?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q5" value="less-24-hours">
+            <span>Less than 24 hours</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q5" value="1-2-days">
+            <span>1-2 days</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q5" value="3-5-days">
+            <span>3-5 days</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q5" value="more-5-days">
+            <span>More than 5 days</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q5" value="never-diagnosed">
+            <span>Never diagnosed</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page2">
+      <div class="question">
+        <div class="question-number">
+          Question 6 of 20
+        </div>
+        <h3>What type of medicine did you take for your last malaria episode?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q6" value="act">
+            <span>Artemisinin-based Combination Therapy (ACT)</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q6" value="chloroquine">
+            <span>Chloroquine</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q6" value="other-antimalarial">
+            <span>Other anti-malarial</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q6" value="traditional-medicine">
+            <span>Traditional medicine</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q6" value="no-medicine">
+            <span>No medicine</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 7 of 20
+        </div>
+        <h3>Did you complete the full course of malaria medication as prescribed?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q7" value="yes">
+            <span>Yes</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q7" value="no">
+            <span>No</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q7" value="not-applicable">
+            <span>Not applicable (did not take medicine)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 8 of 20
+        </div>
+        <h3>Do you own at least one insecticide-treated mosquito net (ITN)?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q8" value="yes">
+            <span>Yes</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q8" value="no">
+            <span>No</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 9 of 20
+        </div>
+        <h3>How many people typically sleep under an ITN in your household?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q9" value="0">
+            <span>0</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q9" value="1">
+            <span>1</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q9" value="2">
+            <span>2</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q9" value="3">
+            <span>3</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q9" value="4+">
+            <span>4 or more</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 10 of 20
+        </div>
+        <h3>How often do you or your household members sleep under an ITN?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q10" value="every-night">
+            <span>Every night</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q10" value="most-nights">
+            <span>Most nights</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q10" value="some-nights">
+            <span>Some nights</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q10" value="rarely">
+            <span>Rarely</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q10" value="never">
+            <span>Never</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page3">
+      <div class="question">
+        <div class="question-number">
+          Question 11 of 20
+        </div>
+        <h3>What do you believe is the primary way malaria is transmitted?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q11" value="mosquito-bites">
+            <span>Mosquito bites</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q11" value="contaminated-water">
+            <span>Contaminated water</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q11" value="dirty-environment">
+            <span>Dirty environment</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q11" value="person-to-person">
+            <span>Person-to-person contact</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q11" value="dont-know">
+            <span>Don't know</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 12 of 20
+        </div>
+        <h3>Do you believe malaria can be prevented?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q12" value="yes">
+            <span>Yes</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q12" value="no">
+            <span>No</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q12" value="dont-know">
+            <span>Don't know</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 13 of 20
+        </div>
+        <h3>From which source do you primarily get information about malaria prevention and treatment?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q13" value="health-facility">
+            <span>Health facility/worker</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q13" value="radio-tv">
+            <span>Radio/TV</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q13" value="community-leaders">
+            <span>Community leaders</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q13" value="friends-family">
+            <span>Friends/Family</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q13" value="school">
+            <span>School</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q13" value="internet-social-media">
+            <span>Internet/Social Media</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 14 of 20
+        </div>
+        <h3>How would you rate your community's awareness about malaria prevention?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q14" value="very-high">
+            <span>Very high</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q14" value="high">
+            <span>High</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q14" value="moderate">
+            <span>Moderate</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q14" value="low">
+            <span>Low</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q14" value="very-low">
+            <span>Very low</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 15 of 20
+        </div>
+        <h3>Have you ever participated in a community malaria awareness program or campaign?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q15" value="yes">
+            <span>Yes</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q15" value="no">
+            <span>No</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page4">
+      <div class="question">
+        <div class="question-number">
+          Question 16 of 20
+        </div>
+        <h3>How many people currently live in your household?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q16" value="1-3">
+            <span>1-3 people</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q16" value="4-6">
+            <span>4-6 people</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q16" value="7-9">
+            <span>7-9 people</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q16" value="10+">
+            <span>10 or more people</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 17 of 20
+        </div>
+        <h3>Does your household have standing water bodies (e.g., open drains, stagnant puddles) nearby?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q17" value="yes">
+            <span>Yes</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q17" value="no">
+            <span>No</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 18 of 20
+        </div>
+        <h3>How often do you clear bushes or stagnant water around your home to prevent mosquito breeding?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q18" value="weekly">
+            <span>Weekly</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q18" value="monthly">
+            <span>Monthly</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q18" value="quarterly">
+            <span>Quarterly</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q18" value="rarely">
+            <span>Rarely</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q18" value="never">
+            <span>Never</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 19 of 20
+        </div>
+        <h3>Do you use any other methods to prevent mosquito bites in your home (e.g., coils, sprays, repellents)?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q19" value="yes">
+            <span>Yes</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q19" value="no">
+            <span>No</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-number">
+          Question 20 of 20
+        </div>
+        <h3>What is the biggest challenge your household faces in preventing malaria?</h3>
+        <div class="options">
+          <label class="option">
+            <input type="radio" name="q20" value="cost-nets-medicine">
+            <span>Cost of nets/medicine</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q20" value="lack-information">
+            <span>Lack of information</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q20" value="mosquito-resistance">
+            <span>Mosquito resistance</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q20" value="poor-sanitation">
+            <span>Poor sanitation</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q20" value="access-healthcare">
+            <span>Access to healthcare</span>
+          </label>
+          <label class="option">
+            <input type="radio" name="q20" value="other">
+            <span>Other</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completion Page -->
+    <div class="page" id="completion">
+      <div class="completion-page">
+        <div class="checkmark">
+          ✓
+        </div>
+        <h2>Survey Complete!</h2>
+        <p>
+          Thank you for taking the time to complete our survey. Your responses have been recorded and will help us improve our services.
+        </p>
+        <div class="results-summary">
+          <h3>Survey Summary</h3>
+          <p>
+            <strong>Questions Answered:</strong> <span id="answeredCount">0</span> out of 20
+          </p>
+          <p>
+            <strong>Completion Time:</strong> <span id="completionTime">0</span> minutes
+          </p>
+        </div>
+        <button class="btn btn-primary" onclick="restartSurvey()">Take Survey Again</button>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation" id="navigation" style="display: none;">
+      <button class="btn btn-secondary" id="prevBtn" onclick="previousPage()">Previous</button>
+      <div class="page-indicator">
+        <span id="currentPage">1</span> of <span id="totalPages">6</span>
+      </div>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextPage()">Next</button>
+    </div>
+  </div><script>
+let currentPageIndex = 0;
+const totalPages = 5; // 4 pages of questions + 1 completion
+let surveyData = {};
+let startTime = new Date();
+let currentUser = null;
+
+// 🔐 Auth check on page load
+window.addEventListener('load', async () => {
+  try {
+    const res = await fetch('/api/session', {
+      credentials: 'include'
+    });
+    const session = await res.json();
+
+    if (!session.signed_in) {
+      window.location.href = 'signin.html';
+      return;
+    }
+
+    currentUser = session;
+    displayUserInfo();
+  } catch (err) {
+    console.error('Auth check failed:', err);
+    window.location.href = 'signin.html';
+  }
+});
+
+function displayUserInfo() {
+  const userHeader = document.getElementById('userHeader');
+  const userInfo = document.getElementById('userInfo');
+  const displayName = currentUser.fullName || currentUser.phone;
+  userInfo.textContent = `Welcome back, ${displayName}!`;
+  userHeader.style.display = 'flex';
+}
+
+async function logout() {
+  const confirmed = confirm('Are you sure you want to logout?');
+  if (!confirmed) return;
+
+  await fetch('/api/logout', {
+    method: 'POST',
+    credentials: 'include'
+  });
+
+  window.location.href = 'signin.html';
+}
+
+function startSurvey() {
+  document.getElementById('welcome').classList.remove('active');
+  document.getElementById('page1').classList.add('active');
+  document.getElementById('navigation').style.display = 'flex';
+  currentPageIndex = 1;
+  updateNavigation();
+  updateProgress();
+  startTime = new Date();
+}
+
+function nextPage() {
+  if (currentPageIndex < totalPages) {
+    saveCurrentPageData();
+    document.getElementById(`page${currentPageIndex}`).classList.remove('active');
+    currentPageIndex++;
+    if (currentPageIndex <= totalPages) {
+      document.getElementById(`page${currentPageIndex}`).classList.add('active');
+    } else {
+      showCompletion();
+    }
+    updateNavigation();
+    updateProgress();
+  } else if (currentPageIndex === totalPages) {
+    saveCurrentPageData();
+    showCompletion();
+  }
+}
+
+function previousPage() {
+  if (currentPageIndex > 1) {
+    document.getElementById(`page${currentPageIndex}`).classList.remove('active');
+    currentPageIndex--;
+    document.getElementById(`page${currentPageIndex}`).classList.add('active');
+    updateNavigation();
+    updateProgress();
+  } else if (currentPageIndex === 1) {
+    document.getElementById(`page${currentPageIndex}`).classList.remove('active');
+    document.getElementById('welcome').classList.add('active');
+    document.getElementById('navigation').style.display = 'none';
+    currentPageIndex = 0;
+    updateProgress();
+  }
+}
+
+function updateNavigation() {
+  document.getElementById('prevBtn').disabled = currentPageIndex === 0;
+  document.getElementById('currentPage').textContent = currentPageIndex === 0 ? '1' : currentPageIndex;
+  document.getElementById('totalPages').textContent = totalPages + 1;
+  document.getElementById('nextBtn').textContent = currentPageIndex === totalPages ? 'Complete Survey' : 'Next';
+}
+
+function updateProgress() {
+  let progress = 0;
+  if (currentPageIndex === 0) progress = 0;
+  else if (currentPageIndex === totalPages) progress = 100;
+  else progress = (currentPageIndex / totalPages) * 100;
+  document.getElementById('progressFill').style.width = progress + '%';
+}
+
+function saveCurrentPageData() {
+  const currentPage = document.getElementById(`page${currentPageIndex}`);
+  if (!currentPage) return;
+
+  const inputs = currentPage.querySelectorAll('input[type="radio"]:checked, textarea');
+  inputs.forEach(input => {
+    surveyData[input.name] = input.value;
+  });
+}
+
+function showCompletion() {
+  document.getElementById(`page${totalPages}`).classList.remove('active');
+  document.getElementById('completion').classList.add('active');
+  document.getElementById('navigation').style.display = 'none';
+
+  const endTime = new Date();
+  const completionTime = Math.round((endTime - startTime) / 60000);
+  const answeredCount = Object.keys(surveyData).filter(k => k.startsWith('q')).length;
+
+  document.getElementById('answeredCount').textContent = answeredCount;
+  document.getElementById('completionTime').textContent = completionTime;
+  document.getElementById('progressFill').style.width = '100%';
+
+  const finalSurveyData = {
+    ...surveyData,
+    userId: currentUser.phone,
+    fullName: currentUser.fullName,
+    completedAt: new Date().toISOString(),
+    completionTime: completionTime
+  };
+
+  console.log('Survey completed:', finalSurveyData);
+
+  // 👇 Redirect after short delay
+  setTimeout(() => {
+    window.location.href = 'congrat.html';
+  }, 2000); // Optional delay (2s)
+}
+
+function restartSurvey() {
+  currentPageIndex = 0;
+  surveyData = {};
+  startTime = new Date();
+
+  document.getElementById('completion').classList.remove('active');
+  document.getElementById('welcome').classList.add('active');
+  document.getElementById('navigation').style.display = 'none';
+  document.getElementById('progressFill').style.width = '0%';
+
+  const allInputs = document.querySelectorAll('input[type="radio"], textarea');
+  allInputs.forEach(input => {
+    if (input.type === 'radio') input.checked = false;
+    else input.value = '';
+  });
+
+  document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+  updateNavigation();
+}
+
+// 🖱 Visuals for radio-style option boxes
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.option').forEach(option => {
+    option.addEventListener('click', function () {
+      const radio = this.querySelector('input[type="radio"]');
+      if (radio) {
+        document.querySelectorAll(`input[name="${radio.name}"]`)
+          .forEach(input => input.closest('.option').classList.remove('selected'));
+        radio.checked = true;
+        this.classList.add('selected');
+      }
+    });
+  });
+});
+
+// ⌨️ Keyboard nav
+document.addEventListener('keydown', e => {
+  if ((e.key === 'ArrowRight' || e.key === 'Enter') && currentPageIndex >= 0 && currentPageIndex < totalPages) {
+    nextPage();
+  } else if (e.key === 'ArrowLeft' && currentPageIndex > 0) {
+    previousPage();
+  }
+});
+</script>
+ 
+
+</body>
+</html>

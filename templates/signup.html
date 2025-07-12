@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Dynamic Survey</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .signup-container {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      max-width: 42rem;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: between;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .step-indicator {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-left: auto;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 0.5rem;
+      background-color: #f3f4f6;
+      border-radius: 0.25rem;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #6366f1);
+      border-radius: 0.25rem;
+      transition: width 0.3s ease;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .step-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .step-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-description {
+      color: #6b7280;
+      font-size: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .required {
+      color: #ef4444;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      background-color: #ffffff;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-input.error {
+      border-color: #ef4444;
+      background-color: #fef2f2;
+    }
+
+    .form-input:disabled {
+      background-color: #f9fafb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    .phone-input-group {
+      display: flex;
+    }
+
+    .country-code {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      background-color: #f9fafb;
+      border: 1px solid #d1d5db;
+      border-right: none;
+      border-radius: 0.5rem 0 0 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+
+    .phone-input {
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 5rem;
+    }
+
+    .password-group {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      transition: color 0.2s ease;
+    }
+
+    .password-toggle:hover {
+      color: #3b82f6;
+    }
+
+    .password-requirements {
+      margin-top: 0.75rem;
+      space-y: 0.25rem;
+    }
+
+    .requirement {
+      display: flex;
+      align-items: center;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .requirement.valid {
+      color: #059669;
+    }
+
+    .requirement.invalid {
+      color: #6b7280;
+    }
+
+    .requirement-icon {
+      width: 0.75rem;
+      height: 0.75rem;
+      margin-right: 0.5rem;
+    }
+
+    .file-upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background-color: #fafafa;
+    }
+
+    .file-upload-area:hover {
+      border-color: #9ca3af;
+      background-color: #f9fafb;
+    }
+
+    .file-upload-area.error {
+      border-color: #ef4444;
+      background-color: #fef2f2;
+    }
+
+    .file-upload-icon {
+      width: 3rem;
+      height: 3rem;
+      margin: 0 auto 0.5rem;
+      color: #9ca3af;
+    }
+
+    .file-upload-text {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+
+    .file-upload-subtext {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .file-preview {
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 0.75rem;
+      display: none;
+    }
+
+    .file-preview.show {
+      display: block;
+    }
+
+    .file-preview-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .file-thumbnail {
+      width: 4rem;
+      height: 4rem;
+      object-fit: cover;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+    }
+
+    .file-details h4 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #111827;
+      margin-bottom: 0.25rem;
+    }
+
+    .file-details p {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .remove-file-btn {
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .remove-file-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .error-message {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      gap: 0.5rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #3b82f6, #6366f1);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #f9fafb;
+      color: #374151;
+    }
+
+    .success-step {
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 4rem;
+      height: 4rem;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+
+    .success-icon svg {
+      width: 2rem;
+      height: 2rem;
+      color: #059669;
+    }
+
+    .account-details {
+      background: #f9fafb;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: left;
+      margin: 1.5rem 0;
+    }
+
+    .account-details h3 {
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+
+    .account-details p {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+
+    .account-details span {
+      font-weight: 500;
+    }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    .footer-link p {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .footer-link a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-link a:hover {
+      color: #2563eb;
+    }
+
+    .spinner {
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 0.5rem;
+      }
+
+      .signup-container {
+        max-width: 100%;
+      }
+
+      .card-header, .card-content {
+        padding: 1rem;
+      }
+
+      .step-title {
+        font-size: 1.25rem;
+      }
+
+      .phone-input-group {
+        flex-direction: column;
+      }
+
+      .country-code {
+        border-right: 1px solid #d1d5db;
+        border-radius: 0.5rem 0.5rem 0 0;
+      }
+
+      .phone-input {
+        border-radius: 0 0 0.5rem 0.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .navigation {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <div class="card-header">
+      <div class="header-content">
+        <h1 class="card-title">Create Account</h1>
+        <span class="step-indicator">Step <span id="currentStep">1</span> of 4</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <!-- Step 1: Personal Information -->
+      <div class="step active" id="step1">
+        <div class="step-header">
+          <h2 class="step-title">Personal Information</h2>
+          <p class="step-description">
+            Let's start with your basic details
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="fullName">Full Name <span class="required">*</span></label>
+          <input type="text" id="fullName" class="form-input" placeholder="Enter your full name">
+          <div class="error-message" id="fullNameError"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number <span class="required">*</span></label>
+          <div class="phone-input-group">
+            <div class="country-code">
+              +234
+            </div>
+            <input type="tel" id="phone" class="form-input phone-input" placeholder="Phone Number" maxlength="10">
+          </div>
+          <div class="error-message" id="phoneError"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="address">Address <span class="required">*</span></label>
+          <textarea id="address" class="form-input textarea" placeholder="Enter your full address" rows="3"></textarea>
+          <div class="error-message" id="addressError"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="country">Country</label>
+          <input type="text" id="country" class="form-input" value="🇳🇬 Nigeria" disabled>
+        </div>
+      </div>
+
+      <!-- Step 2: Identity Verification -->
+      <div class="step" id="step2">
+        <div class="step-header">
+          <h2 class="step-title">Identity Verification</h2>
+          <p class="step-description">
+            We need to verify your identity for security
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ninNumber">NIN (National Identification Number) <span class="required">*</span></label>
+          <input type="text" id="ninNumber" class="form-input" placeholder="Enter your 11-digit NIN" maxlength="11">
+          <div class="error-message" id="ninNumberError"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">NIN Document Photo <span class="required">*</span></label>
+          <div class="file-upload-area" id="fileUploadArea">
+            <input type="file" id="ninPhoto" accept="image/*" style="display: none;">
+            <svg class="file-upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p class="file-upload-text">
+              Click to upload or drag and drop
+            </p>
+            <p class="file-upload-subtext">
+              JPG, PNG up to 5MB
+            </p>
+          </div>
+          <div class="file-preview" id="filePreview">
+            <div class="file-preview-content">
+              <div class="file-info">
+                <img id="fileThumbnail" class="file-thumbnail" src="/placeholder.svg" alt="Document preview">
+                <div class="file-details">
+                  <h4 id="fileName"></h4>
+                  <p id="fileSize"></p>
+                </div>
+              </div>
+              <button type="button" class="remove-file-btn" id="removeFileBtn">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="error-message" id="ninPhotoError"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Password Creation -->
+      <div class="step" id="step3">
+        <div class="step-header">
+          <h2 class="step-title">Create Password</h2>
+          <p class="step-description">
+            Choose a strong password to secure your account
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password <span class="required">*</span></label>
+          <div class="password-group">
+            <input type="password" id="password" class="form-input" placeholder="Create a strong password">
+            <button type="button" class="password-toggle" id="passwordToggle">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="password-requirements">
+            <div class="requirement invalid" id="lengthReq">
+              <svg class="requirement-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              At least 8 characters
+            </div>
+            <div class="requirement invalid" id="upperReq">
+              <svg class="requirement-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              One uppercase letter
+            </div>
+            <div class="requirement invalid" id="lowerReq">
+              <svg class="requirement-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              One lowercase letter
+            </div>
+            <div class="requirement invalid" id="numberReq">
+              <svg class="requirement-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              One number
+            </div>
+          </div>
+          <div class="error-message" id="passwordError"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">Confirm Password <span class="required">*</span></label>
+          <div class="password-group">
+            <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password">
+            <button type="button" class="password-toggle" id="confirmPasswordToggle">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="error-message" id="confirmPasswordError"></div>
+        </div>
+      </div>
+
+      <!-- Step 4: Success -->
+      <div class="step" id="step4">
+        <div class="success-step">
+          <div class="success-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h2 class="step-title">Account Created Successfully!</h2>
+          <p class="step-description">
+            Welcome to the Dynamic Survey platform
+          </p>
+
+          <div class="account-details">
+            <h3>Account Details:</h3>
+            <p>
+              <span>Name:</span> <span id="summaryName"></span>
+            </p>
+            <p>
+              <span>Phone:</span> <span id="summaryPhone"></span>
+            </p>
+            <p>
+              <span>NIN:</span> <span id="summaryNin"></span>
+            </p>
+          </div>
+
+          <button class="btn btn-primary" onclick="window.location.href='/'">
+            Continue to Dashboard
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="navigation" id="navigation">
+        <button type="button" class="btn btn-secondary" id="prevBtn" onclick="previousStep()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Previous
+        </button>
+        <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+          Next
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="footer-link">
+        <p>
+          Already have an account? <a href="signin.html">Sign In</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let currentStep = 1;
+    const totalSteps = 4;
+    let formData = {
+      fullName: '',
+      phone: '',
+      address: '',
+      ninNumber: '',
+      ninPhoto: null,
+      password: '',
+      confirmPassword: ''
+    };
+    let isSubmitting = false;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      updateProgress();
+      setupEventListeners();
+      updateNavigation();
+    });
+
+    function setupEventListeners() {
+      // Input event listeners
+      document.getElementById('fullName').addEventListener('input', () => clearError('fullName'));
+      document.getElementById('phone').addEventListener('input', handlePhoneInput);
+      document.getElementById('address').addEventListener('input', () => clearError('address'));
+      document.getElementById('ninNumber').addEventListener('input', handleNinInput);
+      document.getElementById('password').addEventListener('input', handlePasswordInput);
+      document.getElementById('confirmPassword').addEventListener('input', () => clearError('confirmPassword'));
+
+      // Password toggle listeners
+      document.getElementById('passwordToggle').addEventListener('click', () => togglePassword('password'));
+      document.getElementById('confirmPasswordToggle').addEventListener('click', () => togglePassword('confirmPassword'));
+
+      // File upload listeners
+      document.getElementById('fileUploadArea').addEventListener('click', () => document.getElementById('ninPhoto').click());
+      document.getElementById('ninPhoto').addEventListener('change', handleFileUpload);
+      document.getElementById('removeFileBtn').addEventListener('click', removeFile);
+
+      // Drag and drop listeners
+      const uploadArea = document.getElementById('fileUploadArea');
+      uploadArea.addEventListener('dragover', handleDragOver);
+      uploadArea.addEventListener('dragleave', handleDragLeave);
+      uploadArea.addEventListener('drop', handleDrop);
+    }
+
+    function handlePhoneInput(e) {
+      let value = e.target.value.replace(/\D/g, '').slice(0, 10);
+      e.target.value = value;
+      clearError('phone');
+    }
+
+    function handleNinInput(e) {
+      let value = e.target.value.replace(/\D/g, '').slice(0, 11);
+      e.target.value = value;
+      clearError('ninNumber');
+    }
+
+    function handlePasswordInput() {
+      const password = document.getElementById('password').value;
+      validatePasswordRequirements(password);
+      clearError('password');
+    }
+
+    function validatePasswordRequirements(password) {
+      const requirements = {
+        length: password.length >= 8,
+        upper: /[A-Z]/.test(password),
+        lower: /[a-z]/.test(password),
+        number: /\d/.test(password)
+      };
+
+      document.getElementById('lengthReq').className = 'requirement ' + (requirements.length ? 'valid': 'invalid');
+      document.getElementById('upperReq').className = 'requirement ' + (requirements.upper ? 'valid': 'invalid');
+      document.getElementById('lowerReq').className = 'requirement ' + (requirements.lower ? 'valid': 'invalid');
+      document.getElementById('numberReq').className = 'requirement ' + (requirements.number ? 'valid': 'invalid');
+
+      return Object.values(requirements).every(req => req);
+    }
+
+    function togglePassword(fieldId) {
+      const field = document.getElementById(fieldId);
+      const isPassword = field.type === 'password';
+      field.type = isPassword ? 'text': 'password';
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          showError('ninPhoto', 'File size must be less than 5MB');
+          return;
+        }
+        if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+          showError('ninPhoto', 'Please upload a valid image file (JPG, PNG)');
+          return;
+        }
+
+        formData.ninPhoto = file;
+        displayFilePreview(file);
+        clearError('ninPhoto');
+      }
+    }
+
+    function displayFilePreview(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('fileThumbnail').src = e.target.result;
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+        document.getElementById('filePreview').classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeFile() {
+      formData.ninPhoto = null;
+      document.getElementById('ninPhoto').value = '';
+      document.getElementById('filePreview').classList.remove('show');
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.style.borderColor = '#3b82f6';
+      e.currentTarget.style.backgroundColor = '#f0f4ff';
+    }
+
+    function handleDragLeave(e) {
+      e.preventDefault();
+      e.currentTarget.style.borderColor = '#d1d5db';
+      e.currentTarget.style.backgroundColor = '#fafafa';
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.currentTarget.style.borderColor = '#d1d5db';
+      e.currentTarget.style.backgroundColor = '#fafafa';
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        document.getElementById('ninPhoto').files = files;
+        handleFileUpload( {
+          target: {
+            files: files
+          }
+        });
+      }
+    }
+
+    function validateStep(step) {
+      let isValid = true;
+
+      switch (step) {
+        case 1:
+          const fullName = document.getElementById('fullName').value.trim();
+          const phone = document.getElementById('phone').value.trim();
+          const address = document.getElementById('address').value.trim();
+
+          if (!fullName) {
+            showError('fullName', 'Full name is required');
+            isValid = false;
+          } else if (fullName.length < 2) {
+            showError('fullName', 'Full name must be at least 2 characters');
+            isValid = false;
+          }
+
+          if (!phone) {
+            showError('phone', 'Phone number is required');
+            isValid = false;
+          } else if (!/^[7-9][0-1][0-9]{8}$/.test(phone)) {
+            showError('phone', 'Please enter a valid Nigerian phone number');
+            isValid = false;
+          }
+
+          if (!address) {
+            showError('address', 'Address is required');
+            isValid = false;
+          } else if (address.length < 10) {
+            showError('address', 'Please provide a complete address');
+            isValid = false;
+          }
+
+          if (isValid) {
+            formData.fullName = fullName;
+            formData.phone = phone;
+            formData.address = address;
+          }
+          break;
+
+        case 2:
+          const ninNumber = document.getElementById('ninNumber').value.trim();
+
+          if (!ninNumber) {
+            showError('ninNumber', 'NIN is required');
+            isValid = false;
+          } else if (!/^[0-9]{11}$/.test(ninNumber)) {
+            showError('ninNumber', 'Please enter a valid 11-digit NIN');
+            isValid = false;
+          }
+
+          if (!formData.ninPhoto) {
+            showError('ninPhoto', 'Please upload your NIN document');
+            isValid = false;
+          }
+
+          if (isValid) {
+            formData.ninNumber = ninNumber;
+          }
+          break;
+
+        case 3:
+          const password = document.getElementById('password').value;
+          const confirmPassword = document.getElementById('confirmPassword').value;
+
+          if (!validatePasswordRequirements(password)) {
+            showError('password', 'Password does not meet requirements');
+            isValid = false;
+          }
+
+          if (password !== confirmPassword) {
+            showError('confirmPassword', 'Passwords do not match');
+            isValid = false;
+          }
+
+          if (isValid) {
+            formData.password = password;
+            formData.confirmPassword = confirmPassword;
+          }
+          break;
+      }
+
+      return isValid;
+    }
+
+    function showError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      const errorElement = document.getElementById(fieldId + 'Error');
+
+      if (field) field.classList.add('error');
+      if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.add('show');
+      }
+    }
+
+    function clearError(fieldId) {
+      const field = document.getElementById(fieldId);
+      const errorElement = document.getElementById(fieldId + 'Error');
+
+      if (field) field.classList.remove('error');
+      if (errorElement) errorElement.classList.remove('show');
+    }
+
+    function nextStep() {
+      if (currentStep === 3) {
+        submitForm();
+        return;
+      }
+
+      if (validateStep(currentStep)) {
+        currentStep++;
+        showStep(currentStep);
+        updateProgress();
+        updateNavigation();
+      }
+    }
+
+    function previousStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+        updateProgress();
+        updateNavigation();
+      }
+    }
+
+    function showStep(step) {
+      // Hide all steps
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+
+      // Show current step
+      document.getElementById('step' + step).classList.add('active');
+
+      // Update step indicator
+      document.getElementById('currentStep').textContent = step;
+    }
+
+    function updateProgress() {
+      const progress = (currentStep / totalSteps) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    }
+
+    function updateNavigation() {
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const navigation = document.getElementById('navigation');
+
+      if (currentStep === 4) {
+        navigation.style.display = 'none';
+        return;
+      }
+
+      navigation.style.display = 'flex';
+      prevBtn.disabled = currentStep === 1;
+
+      if (currentStep === 3) {
+        nextBtn.innerHTML = isSubmitting ?
+        '<div class="spinner"></div> Creating Account...':
+        'Create Account';
+      } else {
+        nextBtn.innerHTML = 'Next <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
+      }
+    }
+    async function submitForm() {
+      if (!validateStep(3) || isSubmitting) return;
+
+      isSubmitting = true;
+      updateNavigation();
+
+      const form = new FormData();
+      form.append('fullName', formData.fullName);
+      form.append('phone', formData.phone);
+      form.append('address', formData.address);
+      form.append('ninNumber', formData.ninNumber);
+      form.append('password', formData.password);
+      form.append('ninPhoto', formData.ninPhoto);
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          body: form // No headers needed — browser sets them for FormData
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          window.location.href = '/index.html';
+        } else {
+          alert(data.message || 'Failed to register');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Server error');
+      } finally {
+        isSubmitting = false;
+        updateNavigation();
+      }
+    }
+
+
+  </script>
+</body>
+</html>
